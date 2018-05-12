@@ -45,7 +45,7 @@ for t in threads:
     t.join()
 
 # Write json file
-with open('data.json', 'w') as file:
+with open(global_vars.TEST_TYPE + '_data.json', 'w') as file:
     print('\nWrite json file...')
     file.write(json.dumps(global_vars.RESULT, indent=4, sort_keys=True))
     file.close()
