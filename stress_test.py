@@ -18,6 +18,7 @@ parser.add_argument("-n", "--threads_number", type=int, help="Number of threads"
 parser.add_argument("-r", "--range", type=float, help="Request search range")
 parser.add_argument("-m", "--max_requests", type=int, help="Number of requests")
 parser.add_argument("-t", "--test_type", type=str, help="Test Type (sequential, random or skew)")
+parser.add_argument("-s", "--spawn_time", type=float, help="Thread spawn time in seconds")
 
 args = parser.parse_args()
 
@@ -31,21 +32,24 @@ if args.max_requests:
     global_vars.MAX_REQUESTS = args.max_requests
 if args.test_type:
     global_vars.TEST_TYPE = args.test_type
+if args.test_type:
+    global_vars.SPAWN_TIME = args.spawn_time
 
 # Start threads
 threads = []
 for n in range(global_vars.N_THREADS):
-    t = RequestLoopThread(n, 'Thread-'+str(n), 0.1)
-    t.start()
-    threads.append(t)
-    time.sleep(0.1)
+    if global_vars.CURRENT_REQUEST <= global_vars.MAX_REQUESTS:
+        t = RequestLoopThread(n, 'Thread-'+str(n))
+        t.start()
+        threads.append(t)
+        time.sleep(global_vars.SPAWN_TIME)
 
 # Join threads
 for t in threads:
     t.join()
 
 # Write json file
-with open(global_vars.TEST_TYPE + '_data.json', 'w') as file:
+with open(global_vars.TEST_TYPE + '_T' + str(global_vars.N_THREADS) + '_R' + str(global_vars.RANGE) + '_S' + str(global_vars.SPAWN_TIME) + '_data.json', 'w') as file:
     print('\nWrite json file...')
     file.write(json.dumps(global_vars.RESULT, indent=4, sort_keys=True))
     file.close()

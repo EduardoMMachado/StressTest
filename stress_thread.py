@@ -11,19 +11,17 @@ import random
 import global_vars
 
 class RequestLoopThread(threading.Thread):
-    def __init__(self, threadID, name, delay):
+    def __init__(self, threadID, name):
         threading.Thread.__init__(self)
 
         self.threadID = threadID
         self.name = name
-        self.delay = delay
 
     def run(self):
         while True:
             global_vars.CURRENT_REQUEST += 1
-            if global_vars.EXIT:
-                exit()
             if global_vars.CURRENT_REQUEST > global_vars.MAX_REQUESTS:
+                print('\rEXIT', end='')
                 exit()
 
             params = {
@@ -46,9 +44,10 @@ class RequestLoopThread(threading.Thread):
                         'requests': 1,
                         'responses': 0
                     }
-                
-                print('\rRequest: ' + str(global_vars.CURRENT_REQUEST), end='')
+
+                print('\rREQUESTS: ' + str(global_vars.CURRENT_REQUEST) + ' RESPONSES: ' + str(global_vars.CURRENT_RESPONSE), end='')
                 r = requests.get(global_vars.HOST, params=params)
+                global_vars.CURRENT_RESPONSE += 1
 
                 if r.status_code == 200:
                     if global_vars.RESULT.get(int(time.time())):
@@ -59,14 +58,14 @@ class RequestLoopThread(threading.Thread):
                             'responses': 1
                         }
                     if r._content == {}:
-                        print('Empty data...')
-                        global_vars.EXIT = True
+                        print('\rERROR1', end='')  # Empty data
+                        exit()
                 else:
-                    print('Error: status ' + str(r.status_code))
-                    global_vars.EXIT = True
+                    print('\rERROR2', end='')  # Status != 200
+                    exit()
 
-            except:
-                print('Other fail')
-                global_vars.EXIT = True
+                time.sleep(0.5)
 
-            time.sleep(self.delay)
+            except Exception as exc:
+                print('\r' + str(exc) , end='')  # Other fail
+                exit()
