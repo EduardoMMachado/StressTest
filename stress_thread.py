@@ -22,6 +22,7 @@ class RequestLoopThread(threading.Thread):
             global_vars.CURRENT_REQUEST += 1
             if global_vars.CURRENT_REQUEST > global_vars.MAX_REQUESTS:
                 print('\rEXIT', end='')
+                global_vars.SPAWNED_THREADS -= 1
                 exit()
 
             params = {
@@ -30,11 +31,11 @@ class RequestLoopThread(threading.Thread):
             }
 
             if global_vars.TEST_TYPE == 'sequential':
-                global_vars.RANGE += random.random()
+                global_vars.RANGE += random.random() * 0.1
             elif global_vars.TEST_TYPE == 'random':
                 global_vars.RANGE = random.random() * 100000
             elif global_vars.TEST_TYPE == 'skew':
-                global_vars.RANGE = random.random() + 1000
+                global_vars.RANGE = (random.random() * 100) + 10000
 
             try:
                 if global_vars.RESULT.get(int(time.time())):
@@ -45,11 +46,11 @@ class RequestLoopThread(threading.Thread):
                         'responses': 0
                     }
 
-                print('\rREQUESTS: ' + str(global_vars.CURRENT_REQUEST) + ' RESPONSES: ' + str(global_vars.CURRENT_RESPONSE), end='')
+                print('\rREQUESTS: ' + str(global_vars.CURRENT_REQUEST) + ' RESPONSES: ' + str(global_vars.CURRENT_RESPONSE) + ' THREADS: ' + str(global_vars.SPAWNED_THREADS) + ' SPAWN TIME: ' + str(global_vars.CURRENT_SPAWN), end='')
                 r = requests.get(global_vars.HOST, params=params)
-                global_vars.CURRENT_RESPONSE += 1
 
                 if r.status_code == 200:
+                    global_vars.CURRENT_RESPONSE += 1
                     if global_vars.RESULT.get(int(time.time())):
                         global_vars.RESULT[int(time.time())]['responses'] += 1
                     else:
@@ -59,13 +60,16 @@ class RequestLoopThread(threading.Thread):
                         }
                     if r._content == {}:
                         print('\rERROR1', end='')  # Empty data
-                        exit()
+                        #global_vars.SPAWNED_THREADS -= 1
+                        #exit()
                 else:
                     print('\rERROR2', end='')  # Status != 200
-                    exit()
+                    #global_vars.SPAWNED_THREADS -= 1
+                    #exit()
 
-                time.sleep(0.5)
+                time.sleep(1)
 
-            except Exception as exc:
-                print('\r' + str(exc) , end='')  # Other fail
+            except Exception:
+                print('\rERROR3', end='')  # Other fail
+                global_vars.SPAWNED_THREADS -= 1
                 exit()

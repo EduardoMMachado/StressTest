@@ -2,3 +2,4 @@ venv
 *.pyc
 *vscode*
 *.json
+__pycache__

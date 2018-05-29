@@ -35,21 +35,35 @@ if args.test_type:
 if args.test_type:
     global_vars.SPAWN_TIME = args.spawn_time
 
+# Save file name
+file_name = global_vars.TEST_TYPE + '_T' + str(global_vars.N_THREADS) + '_R' + str(global_vars.RANGE) + '_S' + str(global_vars.SPAWN_TIME) + '_data.json'
+
 # Start threads
+spawn_discount = 0
 threads = []
 for n in range(global_vars.N_THREADS):
     if global_vars.CURRENT_REQUEST <= global_vars.MAX_REQUESTS:
-        t = RequestLoopThread(n, 'Thread-'+str(n))
-        t.start()
-        threads.append(t)
-        time.sleep(global_vars.SPAWN_TIME)
+        try:
+            t = RequestLoopThread(n, 'Thread-'+str(n))
+            t.start()
+            global_vars.SPAWNED_THREADS += 1
+            threads.append(t)
+            time.sleep(global_vars.SPAWN_TIME - spawn_discount)
+        except:
+            print('\rERROR4', end='')
+
+        if ((spawn_discount + 0.2) < global_vars.SPAWN_TIME):
+            global_vars.CURRENT_SPAWN = global_vars.SPAWN_TIME - spawn_discount
+            spawn_discount += 0.1
+        else:
+            global_vars.SLEEP_TIME -= 0.1
 
 # Join threads
 for t in threads:
     t.join()
 
 # Write json file
-with open(global_vars.TEST_TYPE + '_T' + str(global_vars.N_THREADS) + '_R' + str(global_vars.RANGE) + '_S' + str(global_vars.SPAWN_TIME) + '_data.json', 'w') as file:
+with open(file_name, 'w') as file:
     print('\nWrite json file...')
     file.write(json.dumps(global_vars.RESULT, indent=4, sort_keys=True))
     file.close()
