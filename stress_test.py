@@ -52,11 +52,12 @@ for n in range(global_vars.N_THREADS):
         except:
             print('\rERROR4', end='')
 
-        if ((spawn_discount + 0.2) < global_vars.SPAWN_TIME):
+        if ((spawn_discount + 0.5) < global_vars.SPAWN_TIME):
             global_vars.CURRENT_SPAWN = global_vars.SPAWN_TIME - spawn_discount
-            spawn_discount += 0.1
+            spawn_discount += 0.3
         else:
-            global_vars.SLEEP_TIME -= 0.1
+            global_vars.CURRENT_SPAWN = global_vars.SPAWN_TIME - spawn_discount
+            spawn_discount = global_vars.SPAWN_TIME - 0.3
 
 # Join threads
 for t in threads:

@@ -60,14 +60,8 @@ class RequestLoopThread(threading.Thread):
                         }
                     if r._content == {}:
                         print('\rERROR1', end='')  # Empty data
-                        #global_vars.SPAWNED_THREADS -= 1
-                        #exit()
                 else:
                     print('\rERROR2', end='')  # Status != 200
-                    #global_vars.SPAWNED_THREADS -= 1
-                    #exit()
-
-                time.sleep(1)
 
             except Exception:
                 print('\rERROR3', end='')  # Other fail
